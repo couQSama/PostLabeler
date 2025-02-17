@@ -11,74 +11,49 @@ class StatisticsScreen extends StatelessWidget {
     final fileProvider = Provider.of<FileProvider>(context);
     final posts = fileProvider.data;
 
-    // Khởi tạo các biến thống kê
     int totalPosts = posts.length;
     int totalComments = 0;
     int totalCommentsWithLabel = 0;
     int totalCommentsWithSummary = 0;
     int totalPostsWithContent = 0;
-    Map<int, int> labelCounts = {0: 0, 1: 0, 2: 0}; // Đếm số lượng comment theo nhãn
+    int level1Comments = 0;
+    int level2Comments = 0;
+    int level3Comments = 0;
+    Map<int, int> labelCounts = {0: 0, 1: 0, 2: 0};
 
-    // Hàm đệ quy để đếm số lượng comment
-    void countComments(List<dynamic> comments) {
+    void countComments(List<dynamic> comments, int level) {
       for (var comment in comments) {
         totalComments++;
+        if (level == 1) level1Comments++;
+        if (level == 2) level2Comments++;
+        if (level == 3) level3Comments++;
 
-        // Kiểm tra xem comment đã được gán nhãn chưa
         if (comment['label'] != null) {
           totalCommentsWithLabel++;
           labelCounts[comment['label']] = labelCounts[comment['label']]! + 1;
         }
 
-        // Kiểm tra xem comment có tóm tắt không
-        if (comment['summary'] != null && comment['summary'].isNotEmpty) {
+        if (comment['summary']?.isNotEmpty ?? false) {
           totalCommentsWithSummary++;
         }
 
-        // Đệ quy cho các comment con
-        if (comment['comments'] != null && comment['comments'].isNotEmpty) {
-          countComments(comment['comments']);
+        if (comment['comments']?.isNotEmpty ?? false) {
+          countComments(comment['comments'], level + 1);
         }
       }
     }
 
-    // Đếm comment cho tất cả các bài viết
     for (var post in posts) {
-      // Kiểm tra bài viết có nội dung không
-      if (post['content'] != null && post['content'].isNotEmpty) {
+      if (post['content']?.isNotEmpty ?? false) {
         totalPostsWithContent++;
       }
-
-      if (post['comments'] != null && post['comments'].isNotEmpty) {
-        countComments(post['comments']);
+      if (post['comments']?.isNotEmpty ?? false) {
+        countComments(post['comments'], 1);
       }
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Thống Kê',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_upload),
-            tooltip: 'Tải lên JSON',
-            onPressed: () async {
-              try {
-                await fileProvider.pickFile();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Tải dữ liệu thành công!'), backgroundColor: Colors.green),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-                );
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Thống Kê')),
       drawer: const DrawerWidget(),
       body: fileProvider.hasData
           ? Padding(
@@ -91,26 +66,14 @@ class StatisticsScreen extends StatelessWidget {
                     DataColumn(label: Text('Số Lượng')),
                   ],
                   rows: [
-                    DataRow(cells: [
-                      DataCell(Text('Số lượng bài viết')),
-                      DataCell(Text('$totalPosts')),
-                    ]),
-                    DataRow(cells: [
-                      DataCell(Text('Số lượng bài viết có nội dung')),
-                      DataCell(Text('$totalPostsWithContent')),
-                    ]),
-                    DataRow(cells: [
-                      DataCell(Text('Số lượng comment')),
-                      DataCell(Text('$totalComments')),
-                    ]),
-                    DataRow(cells: [
-                      DataCell(Text('Số lượng comment đã gán nhãn')),
-                      DataCell(Text('$totalCommentsWithLabel')),
-                    ]),
-                    DataRow(cells: [
-                      DataCell(Text('Số lượng comment đã có tóm tắt')),
-                      DataCell(Text('$totalCommentsWithSummary')),
-                    ]),
+                    DataRow(cells: [DataCell(Text('Số lượng bài viết')), DataCell(Text('$totalPosts'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng bài viết có nội dung')), DataCell(Text('$totalPostsWithContent'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng comment')), DataCell(Text('$totalComments'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng comment cấp 1')), DataCell(Text('$level1Comments'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng comment cấp 2')), DataCell(Text('$level2Comments'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng comment cấp 3')), DataCell(Text('$level3Comments'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng comment đã gán nhãn')), DataCell(Text('$totalCommentsWithLabel'))]),
+                    DataRow(cells: [DataCell(Text('Số lượng comment đã có tóm tắt')), DataCell(Text('$totalCommentsWithSummary'))]),
                     DataRow(cells: [
                       DataCell(Text('Số lượng comment theo nhãn')),
                       DataCell(Text('Không ủng hộ: ${labelCounts[0]}, Ủng hộ: ${labelCounts[1]}, Trung lập: ${labelCounts[2]}')),
@@ -119,13 +82,7 @@ class StatisticsScreen extends StatelessWidget {
                 ),
               ),
             )
-          : const Center(
-              child: Text(
-                'Chưa có dữ liệu thống kê.\nNhấn nút tải lên JSON để bắt đầu.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            ),
+          : const Center(child: Text('Chưa có dữ liệu thống kê.')),
     );
   }
 }

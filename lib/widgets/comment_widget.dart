@@ -66,6 +66,8 @@ class _CommentWidgetState extends State<CommentWidget> {
               labelText: 'Tóm tắt',
               border: OutlineInputBorder(),
             ),
+            maxLines: null,  // Cho phép tự động xuống dòng khi nội dung dài
+            keyboardType: TextInputType.multiline,  // Chế độ nhập liệu đa dòng
           ),
 
           const SizedBox(height: 12),
