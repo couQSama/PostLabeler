@@ -23,8 +23,6 @@ class _CommentWidgetState extends State<CommentWidget> {
   void initState() {
     super.initState();
     _comment = widget.comment;
-
-    // Gán giá trị 'summary' vào _summaryController khi widget được tạo ra
     _summaryController.text = _comment.summary ?? ''; // Nếu 'summary' null, dùng chuỗi rỗng
   }
 
@@ -60,29 +58,45 @@ class _CommentWidgetState extends State<CommentWidget> {
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             softWrap: true,
           ),
+          const SizedBox(height: 12),        
+          // Hiển thị tóm tắt
+          TextField(
+            controller: _summaryController, // Kết nối controller với TextField
+            decoration: const InputDecoration(
+              labelText: 'Tóm tắt',
+              border: OutlineInputBorder(),
+            ),
+          ),
+
           const SizedBox(height: 12),
 
-          // Đặt TextField (ô tóm tắt) sau nội dung bình luận
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _summaryController, // Kết nối controller với TextField
-                  decoration: const InputDecoration(
-                    labelText: 'Tóm tắt',
-                    border: OutlineInputBorder(),
-                  ),
+          // Nút Lưu tóm tắt
+          ElevatedButton(
+            onPressed: () {
+              saveFile(widget.posts, _comment.index, _comment.label, widget.savePath);
+
+              // Cập nhật tóm tắt
+              _comment.summary = _summaryController.text;
+
+              // Hiển thị thông báo khi lưu thành công
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Tóm tắt đã được lưu thành công!'),
+                  backgroundColor: Colors.green,
                 ),
+              );
+            },
+            child: const Text('Lưu Tóm Tắt'),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-              const SizedBox(width: 10), // Khoảng cách giữa TextField và ElevatedButton
-              ElevatedButton(
-                onPressed: () => saveFile(widget.posts, _comment.index, _comment.label, widget.savePath),
-                child: const Text('Lưu'),
-              ),
-            ],
+              backgroundColor: Colors.lightBlueAccent,
+            ),
           ),
+
           const SizedBox(height: 10),
-          
+
           Row(
             children: [
               for (var label in [0, 1, 2])

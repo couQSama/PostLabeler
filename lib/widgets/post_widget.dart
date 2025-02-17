@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:label_app/models/comment_model.dart';
+import 'package:label_app/widgets/comment_line_painter.dart';
 import 'package:label_app/widgets/comment_widget.dart';
 import 'package:label_app/widgets/content_widget.dart';
-
-import 'comment_line_painter.dart';
 
 class PostWidget extends StatelessWidget {
   final List<dynamic> posts;
   final String? savePath;
   final int postIndex;
+
   const PostWidget({super.key, required this.posts, required this.postIndex, required this.savePath});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 50, right: 50, bottom: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _renderPost(posts[postIndex]),
+      child: SingleChildScrollView(  // Đảm bảo nội dung có thể cuộn
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: _renderPost(posts[postIndex]),
+        ),
       ),
     );
   }
