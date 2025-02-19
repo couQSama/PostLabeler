@@ -61,12 +61,13 @@ class _LabelScreenState extends State<LabelScreen> {
                 Expanded(
                   child: _selectedPost != null && _selectedPost! < posts.length
                       ? PostWidget(
+                          key: ValueKey(_selectedPost), // Thêm key để Flutter rebuild
                           posts: posts,
                           postIndex: _selectedPost!,
-                          savePath: savePath ?? '',  // Truyền savePath vào đây
+                          savePath: savePath ?? '',
                         )
                       : const Center(child: Text('Vui lòng chọn bài viết')),
-                ),
+                )
               ],
             )
           : const Center(
